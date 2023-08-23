@@ -10,7 +10,7 @@ var delegate = require('delegate');
  * @param {Function} callback
  * @return {Object}
  */
-function listen(target, type, callback) {
+function listen(target, type, callback, context) {
     if (!target && !type && !callback) {
         throw new Error('Missing required arguments');
     }
@@ -30,7 +30,8 @@ function listen(target, type, callback) {
         return listenNodeList(target, type, callback);
     }
     else if (is.string(target)) {
-        return listenSelector(target, type, callback);
+        if(context && !is.node(context)) throw new TypeError('context must be a node, if supplied');
+        return listenSelector(target, type, callback, context);
     }
     else {
         throw new TypeError('First argument must be a String, HTMLElement, HTMLCollection, or NodeList');
@@ -86,10 +87,11 @@ function listenNodeList(nodeList, type, callback) {
  * @param {String} selector
  * @param {String} type
  * @param {Function} callback
+ * @param {HTMLElement} context
  * @return {Object}
  */
-function listenSelector(selector, type, callback) {
-    return delegate(document.body, selector, type, callback);
+function listenSelector(selector, type, callback, context) {
+    return delegate(context || document.body, selector, type, callback);
 }
 
 module.exports = listen;
